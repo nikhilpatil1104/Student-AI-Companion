@@ -1,67 +1,64 @@
 // ============================================================
-// FILE: src/App.jsx — full routing with all pages
+// FILE: src/App.jsx
+// PURPOSE: Root component — handles onboarding flow + user state
 // ============================================================
 
 import React, { useState, useEffect } from 'react';
 import OnboardingModal from './components/OnboardingModal';
-import Dashboard       from './components/Dashboard';
-import Sidebar         from './components/Sidebar';
-import Analytics       from './pages/Analytics';
-import WeeklyReport    from './pages/WeeklyReport';
-import Settings        from './pages/Settings';
-import Copilot         from './pages/Copilot';
-import Grades          from './pages/Grades';
-import Schedule        from './pages/Schedule';
-import Leaderboard     from './pages/Leaderboard';
-import Tokens          from './pages/Tokens';
-import { DEMO_USER }   from './lib/firebase';
+import Dashboard from './components/Dashboard';
+import { DEMO_USER } from './lib/firebase';
 
 const STORAGE_KEY = 'campuslife_profile';
 
 export default function App() {
-  const [profile,        setProfile]        = useState(null);
+  const [profile, setProfile] = useState(null);
   const [showOnboarding, setShowOnboarding] = useState(false);
-  const [activePage,     setActivePage]     = useState('dashboard');
-  const [isReady,        setIsReady]        = useState(false);
+  const [isReady, setIsReady] = useState(false);
 
+  // Load saved profile on mount
   useEffect(() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEY);
-      if (saved) { setProfile(JSON.parse(saved)); setShowOnboarding(false); }
-      else        setShowOnboarding(true);
-    } catch { setShowOnboarding(true); }
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        setProfile(parsed);
+        setShowOnboarding(false);
+      } else {
+        setShowOnboarding(true);
+      }
+    } catch {
+      setShowOnboarding(true);
+    }
     setIsReady(true);
   }, []);
 
+  // Save profile changes
   useEffect(() => {
-    if (profile) localStorage.setItem(STORAGE_KEY, JSON.stringify(profile));
+    if (profile) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(profile));
+    }
   }, [profile]);
 
   const handleOnboardingComplete = ({ name, major, year }) => {
-    setProfile({ ...DEMO_USER, id: `user-${Date.now()}`, name, major, year,
-      tokens: 0, scores: { academic: 65, finance: 55, stress: 40 }, streak: 0 });
+    const newProfile = {
+      ...DEMO_USER,
+      id: `user-${Date.now()}`,
+      name,
+      major,
+      year,
+      tokens: 0,
+      scores: { academic: 65, finance: 55, stress: 40 },
+      streak: 0,
+    };
+    setProfile(newProfile);
     setShowOnboarding(false);
   };
 
   const handleReset = () => {
-    if (window.confirm('Reset your profile?')) {
+    if (window.confirm('Reset your profile? Your progress will be saved in localStorage.')) {
       localStorage.removeItem(STORAGE_KEY);
-      setProfile(null); setShowOnboarding(true); setActivePage('dashboard');
-    }
-  };
-
-  const renderPage = () => {
-    switch (activePage) {
-      case 'dashboard':   return <Dashboard initialProfile={profile} onReset={handleReset} />;
-      case 'grades':      return <Grades />;
-      case 'schedule':    return <Schedule />;
-      case 'leaderboard': return <Leaderboard />;
-      case 'tokens':      return <Tokens profile={profile} />;
-      case 'copilot':     return <Copilot profile={profile} />;
-      case 'analytics':   return <Analytics profile={profile} />;
-      case 'weekly':      return <WeeklyReport profile={profile} />;
-      case 'settings':    return <Settings profile={profile} />;
-      default:            return <Dashboard initialProfile={profile} onReset={handleReset} />;
+      setProfile(null);
+      setShowOnboarding(true);
     }
   };
 
@@ -69,12 +66,14 @@ export default function App() {
 
   return (
     <>
-      {showOnboarding && <OnboardingModal onComplete={handleOnboardingComplete} />}
+      {showOnboarding && (
+        <OnboardingModal onComplete={handleOnboardingComplete} />
+      )}
       {profile && (
-        <div className="flex h-screen overflow-hidden">
-          <Sidebar activePage={activePage} onNavigate={setActivePage} profile={profile} />
-          <main className="flex-1 overflow-y-auto">{renderPage()}</main>
-        </div>
+        <Dashboard
+          initialProfile={profile}
+          onReset={handleReset}
+        />
       )}
     </>
   );
