@@ -1,7 +1,6 @@
 {
-  "buildCommand": "npm run build",
-  "outputDirectory": "dist",
-  "framework": "vite",
+  "buildCommand": "cd student-ai && npm install && npm run build",
+  "outputDirectory": "student-ai/dist",
   "rewrites": [
     { "source": "/(.*)", "destination": "/index.html" }
   ]
