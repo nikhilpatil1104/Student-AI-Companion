@@ -65,3 +65,7 @@ VITE_FIREBASE_APP_ID=your_app_id
 - Good decision → +10 tokens
 - Balanced day → +20 tokens  
 - Poor balance → 0 tokens
+<<<<<<< HEAD
+=======
+# student-ai
+>>>>>>> ced27c9d24bd9e3ab4e21910ad24c26974971908
